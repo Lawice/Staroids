@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #define PI 3.14159
-#define max_bullet 5
+#define max_bullet 500
 
 // Structure Map
 typedef struct Map {
@@ -22,17 +22,14 @@ typedef struct Ship{
     float rota, speed,unspeed,rotaspeed,len;
 }Ship;
 
-//Structure Bullet
+//Structure Bullets
 typedef struct Bullet{
     sfVector2f pos,dir;
     sfTexture* texture;
     sfSprite* spr;
-    float speed, dura, time,rota;
-    bool active;
-    int nb;
+    float speed,rota;
     sfClock* clock;
-    sfTime elapsed;
-}Bullet;
+}   Bullet;
 
 //Structures Asteroids
 typedef struct Asteroids{
@@ -53,9 +50,9 @@ typedef struct Asteroids3{
 
 
 
-void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet bullet[]);
-void update(Ship* ship, Bullet bullet[]);
-void draw(sfRenderWindow* window, Map* map, Ship* ship, Bullet bullet[]);
+void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet* bullet);
+void update(Ship* ship, Bullet* bullet);
+void draw(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet);
 
 int main() {
     srand(time(NULL));
@@ -72,11 +69,24 @@ int main() {
         while (sfRenderWindow_pollEvent(window, &event)) {
             if (event.type == sfEvtClosed) {
                 sfRenderWindow_close(window);
+            }else if (event.type == sfEvtKeyPressed) {
+                if (event.key.code == sfKeySpace) {
+                    for (int n = 0; n < max_bullet; n++) {
+                        if (bullet[n].clock == NULL) {
+                            bullet[n].pos = ship.pos;
+                            bullet[n].dir = (sfVector2f) {cosf(ship.rota * PI / 180), sinf(ship.rota * PI / 180)};
+                            bullet[n].rota = ship.rota;
+                            bullet[n].speed = 7.0f;
+                            bullet[n].clock = sfClock_create();
+                            break;
+                        }
+                    }
+                }
             }
         }
 
         draw(window, &map, &ship, bullet);
-        update(&ship, bullet);
+        update(&ship,bullet);
     }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||Destroy||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -86,7 +96,13 @@ int main() {
     sfTexture_destroy(ship.texture_mouv);
     for (int n = 0; n < max_bullet; n++) {
         sfSprite_destroy(bullet[n].spr);
+        sfTexture_destroy(bullet[n].texture);
+        if (bullet[n].clock != NULL) {
+            sfClock_destroy(bullet[n].clock);
+            bullet[n].clock = NULL;
+        }
     }
+   
     sfTexture_destroy(map.texture);
     sfSprite_destroy(map.spr);
     sfRenderWindow_destroy(window);
@@ -95,7 +111,7 @@ int main() {
     return 0;
 }
 
-void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet bullet[]) {
+void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship,Bullet* bullet) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     *icon = sfImage_createFromFile("ship_icon.png");
     sfVideoMode mode = { 1080, 1080, 32 };
@@ -124,29 +140,20 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
     ship->unspeed = 0.05f;
     ship->rotaspeed = 2.5f;
     sfSprite_setPosition(ship->spr, ship->pos);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    bullet->texture = sfTexture_createFromFile("bullet.png", NULL);
-    bullet->speed = 15.0f;
-    bullet->dura = 15.0f;
-    bullet->nb = 0;
-    bullet->clock = sfClock_create();
-    bullet->elapsed = sfClock_getElapsedTime(bullet->clock);
 
-   for (int n = 0; n < max_bullet; n++) {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    for (int n = 0; n < max_bullet; n++) {
         bullet[n].texture = sfTexture_createFromFile("bullet.png", NULL);
         bullet[n].spr = sfSprite_create();
-        bullet[n].pos = (sfVector2f){0,0};
-        bullet[n].active = false;
         sfSprite_setTexture(bullet[n].spr, bullet[n].texture, 1);
-        sfSprite_setOrigin(bullet[n].spr, (sfVector2f){33,33});
-        bullet[n].time = 0.0f;
-        bullet[n].rota = 0.0f;
+        sfSprite_setOrigin(bullet[n].spr, (sfVector2f) { 33, 33 });
+        bullet[n].clock = NULL;
     }
-
     
 }
 
-void update(Ship* ship, Bullet bullet[]) {
+void update(Ship* ship,Bullet* bullet) {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Ship~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     if (sfKeyboard_isKeyPressed(sfKeyUp)) {
         ship->dir.x = cosf(ship->rota * PI / 180);
         ship->dir.y = sinf(ship->rota * PI / 180);
@@ -188,36 +195,35 @@ void update(Ship* ship, Bullet bullet[]) {
         ship->pos.y = 1050;
     }
 
-    if (sfKeyboard_isKeyPressed(sfKeySpace)) {
-        for (int n = 0; n < max_bullet; n++) {
-            if (!bullet[n].active) {
-                bullet->nb+=1;
-                bullet[n].pos = ship->pos;
-                bullet[n].dir = ship->dir;
-                bullet[n].rota = ship->rota;
-                bullet[n].active = true;
-                break;
-            }
-        }
-    }
-    if (bullet->nb != 0) {
-        for (int n = 0; n < max_bullet; n++) {
-            if (bullet[n].active) {
-                bullet[n].elapsed = sfClock_getElapsedTime(bullet->clock);
-                float Time = sfTime_asSeconds(bullet[n].elapsed);
-                if (Time - bullet[n].time > bullet[n].dura) {
-                    bullet[n].active = false;
-                    bullet[n].time = 0.0f;
-                } else {
-                    bullet[n].pos.x += bullet[n].speed * bullet[n].dir.x;
-                    bullet[n].pos.y += bullet[n].speed * bullet[n].dir.y;
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    for (int n = 0; n < max_bullet; n++) {
+        if (bullet[n].clock != NULL) {
+            sfTime elapsed = sfClock_getElapsedTime(bullet[n].clock);
+            if (sfTime_asSeconds(elapsed) < 7.0f) {
+                bullet[n].pos.x += bullet[n].speed * bullet[n].dir.x;
+                bullet[n].pos.y += bullet[n].speed * bullet[n].dir.y;
+                if (bullet[n].pos.x >= 1120) {
+                    bullet[n].pos.x = 30;
                 }
+                if (bullet[n].pos.x <= -30) {
+                    bullet[n].pos.x= 1050;
+                }
+                 if (bullet[n].pos.y >= 1120) {
+                    bullet[n].pos.y = 30;
+                }
+                if (bullet[n].pos.y <= -30) {
+                    bullet[n].pos.y = 1050;
+                }
+            } else {
+                sfClock_destroy(bullet[n].clock);
+                bullet[n].clock = NULL;
             }
         }
     }
+
 }
 
-void draw(sfRenderWindow* window, Map* map, Ship* ship, Bullet bullet[]) {
+void draw(sfRenderWindow* window, Map* map, Ship* ship,Bullet* bullet) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     sfRenderWindow_display(window);
     sfRenderWindow_clear(window, sfBlack);
@@ -227,11 +233,9 @@ void draw(sfRenderWindow* window, Map* map, Ship* ship, Bullet bullet[]) {
     sfSprite_setRotation(ship->spr, ship->rota);
     sfSprite_setPosition(ship->spr, ship->pos);
     sfRenderWindow_drawSprite(window, ship->spr, NULL);
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfSprite_setRotation(ship->spr, ship->rota);
     for (int n = 0; n < max_bullet; n++) {
-        if (bullet[n].active) {
+        if (bullet[n].clock != NULL) {
             sfSprite_setRotation(bullet[n].spr, bullet[n].rota);
             sfSprite_setPosition(bullet[n].spr, bullet[n].pos);
             sfRenderWindow_drawSprite(window, bullet[n].spr, NULL);

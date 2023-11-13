@@ -1,8 +1,10 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: Le répertoire intermédiaire (x64\Debug\) contient des fichiers partagés provenant d'un autre projet (SPOYO2.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
   main.c
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(61,5): warning C4013: 'srand' non défini(e) ; extern retournant int pris par défaut
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(103,22): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(151,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(152,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(169,17): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(58,5): warning C4013: 'srand' non défini(e) ; extern retournant int pris par défaut
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(77,79): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(77,107): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(119,22): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(158,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(159,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(176,17): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
   SPOYO2.vcxproj -> C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\x64\Debug\Staroids.exe
