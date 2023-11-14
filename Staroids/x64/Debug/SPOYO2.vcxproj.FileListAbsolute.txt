@@ -1,3 +1,0 @@
-C:\Users\Gabriel\source\repos\SPOYO2\x64\Debug\SPOYO2.exe
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\x64\Debug\Staroids.exe
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Astéroids\Staroids\Staroids\x64\Debug\Staroids.exe
