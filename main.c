@@ -5,8 +5,8 @@
 #include <stdbool.h>
 
 #define PI 3.14159
-#define max_bullet 150
-#define max_roids 30
+#define max_bullet 250
+#define max_roids 2500
 
 // Structure Map
 typedef struct Map {
@@ -70,6 +70,7 @@ typedef struct Menu {
     //difficulty text
     sfTexture* texture_difficulty;
     sfSprite* spr_difficulty;
+    int diff;
     //difficulty button
     sfText* text_difficulty_easy;
     sfFloatRect bound_difficulty_easy;
@@ -79,25 +80,32 @@ typedef struct Menu {
     sfFloatRect bound_difficulty_hard;
     sfText* text_difficulty_hell;
     sfFloatRect bound_difficulty_hell;
-    
+    //score
     sfText* text_score;
-    sfText* pause;
 
 }Menu;
 
+typedef struct Laser {
+    sfVector2f pos, dir;
+    sfTexture* texture;
+    sfSprite* spr;
+    sfFloatRect bound;
+    sfClock* clock;
+}Laser;
 
-void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu);
+void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu, Laser* laser);
 void draw_main_menu(sfRenderWindow* window, Map* map, Menu* menu);
 void main_menu(sfRenderWindow* window, Menu* menu);
 void draw_selection_menu(sfRenderWindow* window, Map* map, Menu* menu);
-void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu);
-void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu);
+void selection_menu(sfRenderWindow* window, Menu* menu);
+void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu, int nb_roids);
+void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu, int nb_roids);
 void create_bullet(Bullet* bullet, Ship* ship);
+void create_laser(Laser* laser, Ship* ship);
 void respawn_astero(Asteroids* asteroids, int n);
 void respawn_ship(Ship* ship);
 void draw_end_menu(sfRenderWindow* window, Map* map, Menu* menu);
 void end_menu(sfRenderWindow* window, Menu* menu);
-void restart (Ship* ship, Asteroids* asteroids);
 
 int main() {
     srand(time(NULL));
@@ -106,12 +114,17 @@ int main() {
     Map map;
     Ship ship;
     Bullet bullet[max_bullet];
+    Laser laser;
     Asteroids asteroids[max_roids];
     Menu menu;
+    int nb_roids  = 0 ;
+    int spacePressCount = 0;
+    sfClock* clock = sfClock_create();
+    sfTime elapsed = sfClock_getElapsedTime(clock);
 
-    setup(&icon, &window, &map, &ship, bullet, asteroids, &menu);
-
-    while (sfRenderWindow_isOpen(window)) {
+    setup(&icon, &window, &map, &ship, bullet, asteroids, &menu, &laser);
+    
+     while (sfRenderWindow_isOpen(window)) {
         sfEvent event;
         while (sfRenderWindow_pollEvent(window, &event)) {
             if (event.type == sfEvtClosed) {
@@ -119,7 +132,17 @@ int main() {
             }
             else if (event.type == sfEvtKeyPressed) {
                 if (event.key.code == sfKeySpace) {
+                    sfTime currentElapsed = sfClock_getElapsedTime(clock);
+                    sfTime deltaTime = sfTime_subtract(currentElapsed, elapsed);
+                    elapsed = currentElapsed;
                     create_bullet(bullet, &ship);
+                    if (sfTime_asSeconds(deltaTime) > 2.0) {
+                        spacePressCount = 0;
+                    }
+                    spacePressCount++;
+                    if (spacePressCount == 15) {
+                        create_laser(&laser, &ship);
+                    }
                 }
             }
         }
@@ -128,22 +151,40 @@ int main() {
         case 0: //main menu
             draw_main_menu(window, &map, &menu);
             main_menu(window, &menu);
-            restart(&ship, asteroids);
             break;
         case 1: //difficulty selection
-            draw_main_menu(window, &map, &menu);
+            draw_selection_menu(window, &map, &menu);
+            selection_menu(window, &menu);
+                if (menu.diff != 0) {
+                    switch (menu.diff) {
+                        case 1: //easy
+                            nb_roids = 10;
+                            restart (&ship, asteroids,nb_roids, &menu);
+                            break;
+                        case 2: //normal
+                            nb_roids = 20;
+                            restart (&ship, asteroids,nb_roids, &menu);
+                            break;
+                        case 3: //hard
+                            nb_roids = 40;
+                            restart (&ship, asteroids,nb_roids, &menu);
+                            break;
+                        case 4 : //hell
+                            nb_roids = 2500;
+                            restart (&ship, asteroids,nb_roids, &menu);
+                            break;
+                    }
+                }
             break;
         case 2: //game
-            draw_game(window, &map, &ship, bullet, asteroids, &menu);
-            update(&ship, bullet, asteroids, &menu);
+            draw_game(window, &map, &ship, bullet, asteroids, &menu,nb_roids);
+            update(&ship, bullet, asteroids, &menu,nb_roids);
             break;
         case 3: //end screen
             draw_end_menu(window, &map, &menu);
             end_menu(window, &menu);
             break;
         case 4: //pause
-            break;
-        case 5: //loading
             break;
         }
 
@@ -162,7 +203,7 @@ int main() {
             bullet[u].clock = NULL;
         }
     }
-    for (int n = 0; n < max_roids; n++) {
+    for (int n = 0; n < nb_roids; n++) {
         sfSprite_destroy(asteroids[n].spr);
         sfTexture_destroy(asteroids[n].texture);
     }
@@ -180,7 +221,7 @@ int main() {
     return 0;
 }
 
-void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
+void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu, Laser* laser) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     *icon = sfImage_createFromFile("ship_icon.png");
     sfVideoMode mode = { 1080, 1080, 32 };
@@ -198,6 +239,7 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||Init UI||~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     menu->state = 0;
+    menu->diff = 0;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Logo~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     menu->texture_logo = sfTexture_createFromFile("logo.png", NULL);
     menu->spr_logo = sfSprite_create();
@@ -209,7 +251,7 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
     menu->texture_pv2 = sfTexture_createFromFile("2pv.png", NULL);
     menu->texture_pv3 = sfTexture_createFromFile("3pv.png", NULL);
     menu->spr_pv = sfSprite_create();
-    sfSprite_setPosition(menu->spr_pv, (sfVector2f) { 0.0f, 0.0f });
+    sfSprite_setPosition(menu->spr_pv, (sfVector2f) { 0.0f, 48.0f });
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Game over~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     menu->texture_over = sfTexture_createFromFile("game_over.png", NULL);
     menu->spr_over = sfSprite_create();
@@ -273,6 +315,13 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
     sfText_setPosition(menu->text_difficulty_hell, (sfVector2f) { 908, 685 });
     sfText_setColor(menu->text_difficulty_hell, sfWhite);
 
+    menu->text_score = sfText_create();
+    sfText_setFont(menu->text_score, menu->font);
+    sfText_setString(menu->text_score, "Score :");
+    sfText_setCharacterSize(menu->text_score, 48);
+    sfText_setPosition(menu->text_score, (sfVector2f) { 0, -5 });
+    sfText_setColor(menu->text_score, sfWhite);
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init Ship~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     ship->texture = sfTexture_createFromFile("ship.png", NULL);
     ship->texture_mouv = sfTexture_createFromFile("ship_mouv.png", NULL);
@@ -289,11 +338,110 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
         sfSprite_setOrigin(bullet[u].spr, (sfVector2f) { 12, 2 });
         bullet[u].clock = NULL;
     }
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Laser~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    laser->texture = sfTexture_createFromFile("bullet.png", NULL);
+    laser->spr = sfSprite_create();
+    sfSprite_setTexture(laser->spr, laser->texture, 1);
+    sfSprite_setOrigin(laser->.spr, (sfVector2f) { 12, 2 });
+    laser->clock = NULL;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Init Asteroids~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     asteroids->speed = 3.0f;
+}
 
-    for (int n = 0; n < max_roids; n++) {
+void draw_main_menu(sfRenderWindow* window, Map* map, Menu* menu) {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfRenderWindow_display(window);
+    sfRenderWindow_clear(window, sfBlack);
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfSprite_setTexture(map->spr, map->texture_paused, 1);
+    sfRenderWindow_drawSprite(window, map->spr, NULL);
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~UI~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfRenderWindow_drawSprite(window, menu->spr_logo, NULL);
+    sfRenderWindow_drawText(window, menu->text_play, NULL);
+    sfRenderWindow_drawText(window, menu->text_quit, NULL);
+}
+
+void main_menu(sfRenderWindow* window, Menu* menu) {
+    menu->bound_play = sfText_getGlobalBounds(menu->text_play);
+    menu->bound_quit = sfText_getGlobalBounds(menu->text_quit);
+    sfFloatRect mouse = (sfFloatRect){ sfMouse_getPosition(window).x, sfMouse_getPosition(window).y, 1, 1 };
+
+    if (sfFloatRect_intersects(&menu->bound_play, &mouse, NULL)) {
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->state = 1;
+        }
+    }
+
+    if (sfFloatRect_intersects(&menu->bound_quit, &mouse, NULL)) {
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            sfRenderWindow_close(window);
+        }
+    }
+}
+
+void draw_selection_menu(sfRenderWindow* window, Map* map, Menu* menu) {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfRenderWindow_display(window);
+    sfRenderWindow_clear(window, sfBlack);
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfSprite_setTexture(map->spr, map->texture_paused, 1);
+    sfRenderWindow_drawSprite(window, map->spr, NULL);
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~UI~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    sfRenderWindow_drawSprite(window, menu->spr_difficulty, NULL);
+    sfRenderWindow_drawText(window, menu->text_difficulty_easy, NULL);
+    sfRenderWindow_drawText(window, menu->text_difficulty_normal, NULL);
+    sfRenderWindow_drawText(window, menu->text_difficulty_hard, NULL);
+    sfRenderWindow_drawText(window, menu->text_difficulty_hell, NULL);
+}
+
+void selection_menu(sfRenderWindow* window, Menu* menu) {
+    menu->bound_difficulty_easy = sfText_getGlobalBounds(menu->text_difficulty_easy);
+    menu->bound_difficulty_normal = sfText_getGlobalBounds(menu->text_difficulty_normal);
+    menu->bound_difficulty_hard = sfText_getGlobalBounds(menu->text_difficulty_hard);
+    menu->bound_difficulty_hell = sfText_getGlobalBounds(menu->text_difficulty_hell);
+    sfFloatRect mouse = (sfFloatRect){ sfMouse_getPosition(window).x, sfMouse_getPosition(window).y, 1, 1 };
+
+    if (sfFloatRect_intersects(&menu->bound_difficulty_easy, &mouse, NULL)) {
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->diff = 1;
+        }
+    }
+
+    if (sfFloatRect_intersects(&menu->bound_difficulty_normal, &mouse, NULL)) {
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->diff = 2;
+        }
+    }
+
+    if (sfFloatRect_intersects(&menu->bound_difficulty_hard, &mouse, NULL)) {
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->diff = 3;
+        }
+    }
+
+    if (sfFloatRect_intersects(&menu->bound_difficulty_hell, &mouse, NULL)) {
+        sfText_setColor(menu->text_difficulty_hell, sfRed);
+        if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->diff = 4;
+        }
+    } else {
+        sfText_setColor(menu->text_difficulty_hell, sfWhite);
+    }
+}
+
+void restart (Ship* ship, Asteroids* asteroids, int nb_roids, Menu* menu) {
+    ship->pv = 3;
+    ship->score = 0;
+    ship->len = 0;
+    ship->rota = -90;
+    ship->pos = (sfVector2f){ 540,900 };
+    ship->power = (sfVector2f){ 0,0 };
+    ship->speed = 0.1f;
+    ship->unspeed = 0.05f;
+    ship->rotaspeed = 2.5f;
+
+    for (int n = 0; n < nb_roids; n++) {
         asteroids[n].texture = sfTexture_createFromFile("asteroids.png", NULL);
         asteroids[n].spr = sfSprite_create();
         sfSprite_setTexture(asteroids[n].spr, asteroids[n].texture, 1);
@@ -366,60 +514,10 @@ void setup(sfImage** icon, sfRenderWindow** window, Map* map, Ship* ship, Bullet
 
         sfSprite_setPosition(asteroids[n].spr, asteroids[n].pos);
     }
-
+    menu->state=2;
 }
 
-void draw_main_menu(sfRenderWindow* window, Map* map, Menu* menu) {
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfRenderWindow_display(window);
-    sfRenderWindow_clear(window, sfBlack);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfSprite_setTexture(map->spr, map->texture_paused, 1);
-    sfRenderWindow_drawSprite(window, map->spr, NULL);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~UI~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfRenderWindow_drawSprite(window, menu->spr_logo, NULL);
-    sfRenderWindow_drawText(window, menu->text_play, NULL);
-    sfRenderWindow_drawText(window, menu->text_quit, NULL);
-}
-
-void main_menu(sfRenderWindow* window, Menu* menu) {
-    menu->bound_play = sfText_getGlobalBounds(menu->text_play);
-    menu->bound_quit = sfText_getGlobalBounds(menu->text_quit);
-    sfFloatRect mouse = (sfFloatRect){ sfMouse_getPosition(window).x, sfMouse_getPosition(window).y, 1, 1 };
-
-    if (sfFloatRect_intersects(&menu->bound_play, &mouse, NULL)) {
-        if (sfMouse_isButtonPressed(sfMouseLeft)) {
-            menu->state = 2;
-        }
-    }
-
-    if (sfFloatRect_intersects(&menu->bound_quit, &mouse, NULL)) {
-        if (sfMouse_isButtonPressed(sfMouseLeft)) {
-            sfRenderWindow_close(window);
-        }
-    }
-}
-
-void draw_selection_menu(sfRenderWindow* window, Map* map, Menu* menu) {
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfRenderWindow_display(window);
-    sfRenderWindow_clear(window, sfBlack);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Map~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfSprite_setTexture(map->spr, map->texture_paused, 1);
-    sfRenderWindow_drawSprite(window, map->spr, NULL);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~UI~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    sfRenderWindow_drawSprite(window, menu->spr_difficulty, NULL);
-    sfRenderWindow_drawText(window, menu->text_difficulty_easy, NULL);
-    sfRenderWindow_drawText(window, menu->text_difficulty_normal, NULL);
-    sfRenderWindow_drawText(window, menu->text_difficulty_hard, NULL);
-    sfRenderWindow_drawText(window, menu->text_difficulty_hell, NULL);
-}
-
-void selection_menu(sfRenderWindow* window, Menu* menu) {
-
-}
-
-void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
+void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu,int nb_roids) {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Window~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     sfRenderWindow_display(window);
     sfRenderWindow_clear(window, sfBlack);
@@ -428,6 +526,11 @@ void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Ast
     sfRenderWindow_drawSprite(window, map->spr, NULL);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~UI~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+    char scorechar[20];
+    snprintf(scorechar, 20, "Score : %d", ship->score);
+    sfText_setString(menu->text_score, scorechar);
+    sfRenderWindow_drawSprite(window, menu->text_score, NULL);
+    
     switch (ship->pv) {
     case 3:
         sfSprite_setTexture(menu->spr_pv, menu->texture_pv3, 1);
@@ -446,8 +549,10 @@ void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Ast
     }
 
 
+
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Asteroids~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    for (int n = 0; n < max_roids; n++) {
+    for (int n = 0; n < nb_roids; n++) {
         sfSprite_setPosition(asteroids[n].spr, asteroids[n].pos);
         sfRenderWindow_drawSprite(window, asteroids[n].spr, NULL);
     }
@@ -460,14 +565,21 @@ void draw_game(sfRenderWindow* window, Map* map, Ship* ship, Bullet* bullet, Ast
             sfRenderWindow_drawSprite(window, bullet[u].spr, NULL);
         }
     }
+
+    if (laser->clock != NULL) {
+        sfSprite_setRotation(laser->spr, laser->rota);
+            sfSprite_setPosition(laser->.spr, laser->wpos);
+            sfRenderWindow_drawSprite(window, laser->spr, NULL);
+        }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Ship~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     sfSprite_setRotation(ship->spr, ship->rota);
     sfSprite_setPosition(ship->spr, ship->pos);
     sfRenderWindow_drawSprite(window, ship->spr, NULL);
 }
 
-void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Ship~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu, int nb_roids) {
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Ship~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     if (sfKeyboard_isKeyPressed(sfKeyUp)) {
         ship->dir.x = cosf(ship->rota * PI / 180);
         ship->dir.y = sinf(ship->rota * PI / 180);
@@ -510,11 +622,11 @@ void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
         ship->pos.y = 1050;
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Bullet~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
     for (int u = 0; u < max_bullet; u++) {
         if (bullet[u].clock != NULL) {
-            sfTime elapsed = sfClock_getElapsedTime(bullet[u].clock);
-            if (sfTime_asSeconds(elapsed) < bullet[u].time) {
+            sfTime elapsed_bul = sfClock_getElapsedTime(bullet[u].clock);
+            if (sfTime_asSeconds(elapsed_bul) < bullet[u].time) {
                 bullet[u].pos.x += bullet[u].speed * bullet[u].dir.x;
                 bullet[u].pos.y += bullet[u].speed * bullet[u].dir.y;
                 if (bullet[u].pos.x >= 1120) {
@@ -536,9 +648,20 @@ void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
             }
         }
     }
+    
+    if (laser->clock != NULL) {
+            sfTime elapsed_las = sfClock_getElapsedTime(laser->clock);
+            if (sfTime_asSeconds(elapsed_las) < 3) {
+                laser->pos = laser->dir;
+            }
+            else {
+                sfClock_destroy(laser->clock);
+                laser->clock = NULL;
+            }
+        }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Asteroid~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-    for (int n = 0; n < max_roids; n++) {
+    for (int n = 0; n < nb_roids; n++) {
         asteroids[n].pos.x += asteroids->speed * asteroids[n].dir.x;
         asteroids[n].pos.y += asteroids->speed * asteroids[n].dir.y;
 
@@ -554,7 +677,7 @@ void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
     ship->bound.width -= 100;
     ship->bound.left += 50;
 
-    for (int n = 0; n < max_roids; n++) {
+    for (int n = 0; n < nb_roids; n++) {
         asteroids[n].bound = sfSprite_getGlobalBounds(asteroids[n].spr);
         if (sfFloatRect_intersects(&ship->bound, &asteroids[n].bound, NULL) == sfTrue) {
             respawn_astero(asteroids, n);
@@ -571,9 +694,10 @@ void update(Ship* ship, Bullet* bullet, Asteroids* asteroids, Menu* menu) {
         if (bullet[u].clock != NULL) {
             bullet[u].bound = sfSprite_getGlobalBounds(bullet[u].spr);
 
-            for (int n = 0; n < max_roids; n++) {
+            for (int n = 0; n < nb_roids; n++) {
                 asteroids[n].bound = sfSprite_getGlobalBounds(asteroids[n].spr);
                 if (sfFloatRect_intersects(&bullet[u].bound, &asteroids[n].bound, NULL) == sfTrue) {
+                    ship->score+=25;
                     respawn_astero(asteroids, n);
                     bullet[u].clock = NULL;
                 }
@@ -596,6 +720,10 @@ void create_bullet(Bullet* bullet, Ship* ship) {
             break;
         }
     }
+}
+
+void create_laser(Laser* laser, Ship* ship) {
+
 }
 
 void respawn_astero(Asteroids* asteroids, int n) {
@@ -689,6 +817,9 @@ void draw_end_menu(sfRenderWindow* window, Map* map, Menu* menu) {
     sfRenderWindow_drawSprite(window, menu->spr_over, NULL);
     sfRenderWindow_drawText(window, menu->text_menu, NULL);
     sfRenderWindow_drawText(window, menu->text_quit, NULL);
+    snprintf(scorechar, 20, "Score : %d", ship->score);
+    sfText_setString(menu->text_score, scorechar);
+    sfRenderWindow_drawSprite(window, menu->text_score, NULL);
 }
 
 void end_menu(sfRenderWindow* window, Menu* menu) {
@@ -698,6 +829,7 @@ void end_menu(sfRenderWindow* window, Menu* menu) {
 
     if (sfFloatRect_intersects(&menu->bound_menu, &mouse, NULL)) {
         if (sfMouse_isButtonPressed(sfMouseLeft)) {
+            menu->diff = 0;
             menu->state = 0;
         }
     }
@@ -708,83 +840,4 @@ void end_menu(sfRenderWindow* window, Menu* menu) {
         }
     }
 
-}
-
-void restart (Ship* ship, Asteroids* asteroids) {
-    ship->pv = 3;
-    ship->score = 0;
-    ship->len = 0;
-    ship->rota = -90;
-    ship->pos = (sfVector2f){ 540,900 };
-    ship->power = (sfVector2f){ 0,0 };
-    ship->speed = 0.1f;
-    ship->unspeed = 0.05f;
-    ship->rotaspeed = 2.5f;
-
-    for (int n = 0; n < max_roids; n++) {
-        asteroids[n].border = rand() % 4;
-        switch (asteroids[n].border) {
-        case 0: //top
-            asteroids[n].pos.x = rand() % 1080 + 1;
-            asteroids[n].pos.y = 0;
-            asteroids[n].dir.y = ((float)rand() / 180) - 0.5f;
-            asteroids[n].orient = rand() % 2;
-            switch (asteroids[n].orient) {
-            case 0:
-                asteroids[n].dir.x = ((float)rand() / 360) - 0.5f;
-                break;
-            case 1:
-                asteroids[n].dir.x = -((float)rand() / 360) - 0.5f;
-                break;
-            }
-            break;
-        case 1: //right
-            asteroids[n].pos.x = 1080;
-            asteroids[n].pos.y = rand() % 1080 + 1;
-            asteroids[n].dir.x = -((float)rand() / 180) - 0.5f;
-            switch (asteroids[n].orient) {
-            case 0:
-                asteroids[n].dir.y = ((float)rand() / 360) - 0.5f;
-                break;
-            case 1:
-                asteroids[n].dir.y = -((float)rand() / 360) - 0.5f;
-                break;
-            }
-            break;
-        case 2: //bottom
-            asteroids[n].pos.x = rand() % 1080 + 1;
-            asteroids[n].pos.y = 1080;
-            asteroids[n].dir.y = -((float)rand() / 180) - 0.5f;
-            asteroids[n].orient = rand() % 2;
-            switch (asteroids[n].orient) {
-            case 0:
-                asteroids[n].dir.x = ((float)rand() / 360) - 0.5f;
-                break;
-            case 1:
-                asteroids[n].dir.x = -((float)rand() / 360) - 0.5f;
-                break;
-            }
-            break;
-        case 3: // left
-            asteroids[n].pos.x = 0;
-            asteroids[n].pos.y = rand() % 1080 + 1;
-            asteroids[n].dir.x = ((float)rand() / 180) - 0.5f;
-            asteroids[n].orient = rand() % 2;
-            switch (asteroids[n].orient) {
-            case 0:
-                asteroids[n].dir.y = ((float)rand() / 360) - 0.5f;
-                break;
-            case 1:
-                asteroids[n].dir.y = -((float)rand() / 360) - 0.5f;
-                break;
-            }
-            break;
-        }
-
-        asteroids[n].len = sqrt(pow(asteroids[n].dir.x, 2) + pow(asteroids[n].dir.y, 2));
-        if (asteroids[n].len != 0) {
-            asteroids[n].dir.x /= asteroids[n].len;
-            asteroids[n].dir.y /= asteroids[n].len;
-        }
-    }
 }

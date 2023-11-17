@@ -1,34 +1,34 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: Le répertoire intermédiaire (x64\Debug\) contient des fichiers partagés provenant d'un autre projet (SPOYO2.vcxproj). Cela peut entraîner un comportement de nettoyage et de regénération incorrect.
   main.c
 C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(103,5): warning C4013: 'srand' non défini(e) ; extern retournant int pris par défaut
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(188,22): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(302,31): warning C4013: 'rand' non défini(e) ; extern retournant int pris par défaut
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(305,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(320,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(332,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(347,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(361,28): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(388,60): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(388,91): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(388,67): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(388,98): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(472,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(473,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(491,17): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(592,64): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(592,93): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(605,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(620,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(632,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(647,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(661,24): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(697,60): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(697,91): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(697,67): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(697,98): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(728,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(743,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(755,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(770,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
-C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(784,28): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(207,22): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(340,60): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(340,91): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(340,67): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(340,98): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(375,60): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(375,91): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(375,67): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(375,98): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(422,31): warning C4013: 'rand' non défini(e) ; extern retournant int pris par défaut
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(425,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(440,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(452,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(467,48): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(481,28): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(504,43): warning C4133: 'fonction' : types incompatibles - de 'sfText *' à 'const sfSprite *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(547,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(548,44): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(566,17): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(668,64): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(668,93): warning C4244: 'fonction' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(681,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(696,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(708,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(723,44): warning C4244: '=' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(737,24): warning C4244: '=' : conversion de 'double' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(773,60): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(773,91): warning C4133: 'fonction' : types incompatibles - de 'sfRenderWindow *' à 'const sfWindow *'
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(773,67): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
+C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\main.c(773,98): warning C4244: 'initialisation' : conversion de 'int' en 'float', perte possible de données
   SPOYO2.vcxproj -> C:\Users\icela\Documents\Code\La Horde\PB1\Code\C\Staroids\x64\Debug\Staroids.exe
